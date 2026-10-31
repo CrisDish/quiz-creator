@@ -16,7 +16,7 @@ function app_config(): array
         'env' => env_value('APP_ENV', 'production'),
         'debug' => filter_var(env_value('APP_DEBUG', 'false'), FILTER_VALIDATE_BOOL),
         'url' => rtrim((string) env_value('APP_URL', 'http://localhost/quiz-creator/'), '/') . '/',
-        'provider' => strtolower((string) env_value('AI_PROVIDER', 'openai')),
+        'provider' => strtolower((string) env_value('AI_PROVIDER', 'gemini')),
         'openai_key' => env_value('OPENAI_API_KEY', ''),
         'openai_model' => env_value('OPENAI_MODEL', 'gpt-4.1-mini'),
         'gemini_key' => env_value('GEMINI_API_KEY', ''),

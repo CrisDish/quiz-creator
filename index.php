@@ -6,11 +6,13 @@ use QuizCreator\Services\AI\OpenAIProvider;
 use QuizCreator\Services\AI\GeminiProvider;
 use QuizCreator\Services\Quiz\Validator;
 use QuizCreator\Services\Quiz\Grader;
+require __DIR__.'/config/env.php';
+load_local_env(__DIR__.'/.env');
 require __DIR__.'/config/app.php';
 require __DIR__.'/config/database.php';
 foreach (['Support/Security.php','Services/Documents/Extractor.php','Services/AI/Provider.php','Services/AI/HttpProvider.php','Services/AI/OpenAIProvider.php','Services/AI/GeminiProvider.php','Services/Quiz/Validator.php','Services/Quiz/Grader.php'] as $file) require __DIR__.'/src/'.$file;
 $config=app_config();
-if(session_status()!==PHP_SESSION_ACTIVE){session_set_cookie_params(['httponly'=>true,'secure'=>!empty($_SERVER['HTTPS']),'samesite'=>'Lax']);session_start();}
+if(session_status()!==PHP_SESSION_ACTIVE){ini_set('session.use_strict_mode','1');session_set_cookie_params(['httponly'=>true,'secure'=>!empty($_SERVER['HTTPS']),'samesite'=>'Lax']);session_start();}
 $pdo=null;$dbError='';try{$pdo=database();}catch(Throwable $e){$dbError=$e->getMessage();error_log('Database connection failed: '.$e->getMessage());}
 foreach(['uploads','extracted','logs','tmp'] as $dir){$p=$config['storage'].'/'.$dir;if(!is_dir($p))@mkdir($p,0770,true);}
 function provider(array $c): QuizCreator\Services\AI\Provider { return $c['provider']==='gemini'?new GeminiProvider((string)$c['gemini_key'],(string)$c['gemini_model'],$c['timeout']):new OpenAIProvider((string)$c['openai_key'],(string)$c['openai_model'],$c['timeout']); }

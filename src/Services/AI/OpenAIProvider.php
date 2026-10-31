@@ -6,6 +6,7 @@ final class OpenAIProvider extends HttpProvider
 {
     public function generate(string $prompt, array $schema): string
     {
+        $prompt = $this->protectPrompt($prompt);
         $r=$this->request('https://api.openai.com/v1/responses',['Authorization: Bearer '.$this->key,'Content-Type: application/json'],[
           'model'=>$this->model,'input'=>$prompt,'text'=>['format'=>['type'=>'json_schema','name'=>'quiz_items','strict'=>true,'schema'=>$schema]]
         ]);

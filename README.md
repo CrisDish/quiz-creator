@@ -11,7 +11,7 @@ A single-user PHP application that saves handouts and quiz history in a local Ma
 
 ## 2. Project folder and services
 
-The project folder should be `C:\xampp\htdocs\quiz-creator`. This checkout is `C:\xampp\htdocs\quiz-creator\quiz-creator`; copy its contents one level up if you want the exact URL below. Start **Apache** and **MySQL** from the XAMPP Control Panel.
+The project root is C:\xampp\htdocs\quiz-creator, matching the local URL below. Start **Apache** and **MySQL** from the XAMPP Control Panel.
 
 Open `http://localhost/quiz-creator/`. If you keep the nested checkout path, use `http://localhost/quiz-creator/quiz-creator/` and set `APP_URL` to that URL.
 
@@ -40,25 +40,11 @@ Exact variables are listed in `.env.example`. Supported names:
 - OpenAI: `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-4.1-mini`). Uses OpenAI's Responses endpoint and JSON Schema structured output.
 - Gemini: `GEMINI_API_KEY`, `GEMINI_MODEL` (default `gemini-2.5-flash`). Uses Gemini `generateContent` and JSON schema output.
 
-Never put real keys in Git, HTML, JavaScript, database tables, or a publicly served file. `.env.example` is documentation only; this project does not load a `.env` file. PHP CLI and Apache are separate processes: variables set only in a PowerShell window do **not** reliably reach Apache.
+Never put real keys in Git, HTML, JavaScript, database tables, or a publicly served file. The app loads the project-root .env file on the server before reading configuration. The real .env is ignored by Git; .env.example contains placeholders only. The local .env file takes precedence over process-level variables. Never put a real key in a commit.
 
-Recommended local setup: in XAMPP Control Panel, stop Apache. Open `C:\xampp\apache\conf\httpd.conf` and add an `IncludeOptional conf/extra/quiz-creator-env.conf` line. Create `C:\xampp\apache\conf\extra\quiz-creator-env.conf` (outside the web root) with lines such as:
+Local XAMPP setup: copy .env.example to C:\xampp\htdocs\quiz-creator\.env if you need a fresh template, then edit .env in VS Code. Set AI_PROVIDER=gemini, GEMINI_API_KEY to your private key, and GEMINI_MODEL=gemini-2.5-flash. Leave OPENAI_API_KEY blank if unused. Save the file and refresh the app; no Apache restart is normally needed for .env edits. The loader preserves quoted key characters and does not expand dollar signs or backslashes. Never paste the real key in chat, screenshots, Git, or browser code.
 
-```apache
-SetEnv AI_PROVIDER openai
-SetEnv OPENAI_API_KEY your_real_key_here
-SetEnv OPENAI_MODEL gpt-4.1-mini
-SetEnv DB_HOST 127.0.0.1
-SetEnv DB_PORT 3306
-SetEnv DB_NAME quiz_creator
-SetEnv DB_USER root
-SetEnv DB_PASSWORD your_database_password
-SetEnv APP_ENV development
-SetEnv APP_DEBUG true
-SetEnv APP_URL http://localhost/quiz-creator/
-```
-
-For Gemini use `SetEnv AI_PROVIDER gemini`, `SetEnv GEMINI_API_KEY your_real_key_here`, and `SetEnv GEMINI_MODEL gemini-2.5-flash`. Do not configure both providers' keys unless you intend to store both locally. Keep this Apache config outside `htdocs`, restrict Windows account access, then restart Apache. `SetEnv` is provided by Apache's `mod_env`; check that module is loaded. The Settings screen reports whether the selected key exists without displaying it. PHP CLI checks may differ from Apache; verify through that screen.
+The root .htaccess denies HTTP access to .env, .env.* and .git; storage/.htaccess denies requests to private uploads and text. These rules require Apache override access (AllowOverride AuthConfig or AllowOverride All) and mod_authz_core on Apache 2.4. Test directly by requesting http://localhost/quiz-creator/.env; Apache should return 403 or 404, never file content. If it returns another status, stop Apache and check C:\xampp\apache\conf\httpd.conf for AllowOverride None, enable the appropriate override for the project directory, and restart Apache. Settings reports only whether the selected key is present.
 
 ## 6. Use the app
 
@@ -84,7 +70,7 @@ Live database initialization, upload through Apache, provider connectivity, and 
 ## 8. Troubleshooting
 
 - **Database unavailable:** start MySQL; import `database/schema.sql`; verify DB values in the Apache config and restart Apache.
-- **Provider key missing:** ensure `SetEnv` is in the included Apache config, restart Apache, and check Settings. A CLI environment variable is not proof Apache received it.
+- **Provider key missing:** check that .env is readable by Apache and AI_PROVIDER=gemini is selected in Settings.
 - **401/403:** recheck key, selected provider, account access, and model availability.
 - **429/timeout:** wait, check the provider dashboard and account limits, then retry. No alternate provider is selected automatically.
 - **PDF needs Composer:** run `composer install` in this project folder and confirm `vendor/autoload.php` exists.
