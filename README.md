@@ -6,7 +6,7 @@ A single-user PHP application that saves handouts and quiz history in a local Ma
 
 - Windows 10/11 and XAMPP with PHP 8.1+ and MariaDB/MySQL.
 - Composer 2 for PDF parsing (`smalot/pdfparser`). Install Composer from [getcomposer.org](https://getcomposer.org/) and reopen PowerShell after installation.
-- An OpenAI API key or Google Gemini API key for generation. Provider prices, rate limits, and account eligibility vary; do not assume use is free.
+- A Google Gemini API key. Gemini usage, free-tier eligibility, and quotas depend on your Google AI Studio project.
 - PHP extensions `pdo_mysql`, `curl`, `fileinfo`, `mbstring`, `dom`, `xml`, and `zip` enabled in XAMPP's `php.ini`.
 
 ## 2. Project folder and services
@@ -36,13 +36,12 @@ If Composer is missing, install it first and ensure `composer` is on PATH. PDF p
 
 Exact variables are listed in `.env.example`. Supported names:
 
-- Common: `APP_ENV`, `APP_DEBUG`, `APP_URL`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `AI_PROVIDER`, `AI_TIMEOUT`, `MAX_UPLOAD_MB`.
-- OpenAI: `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-4.1-mini`). Uses OpenAI's Responses endpoint and JSON Schema structured output.
-- Gemini: `GEMINI_API_KEY`, `GEMINI_MODEL` (default `gemini-2.5-flash`). Uses Gemini `generateContent` and JSON schema output.
+- Common variables: APP_ENV, APP_DEBUG, APP_URL, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, AI_TIMEOUT, MAX_UPLOAD_MB.
+- Gemini variables: GEMINI_API_KEY and GEMINI_MODEL (default gemini-3.8-flash). Uses Google's Interactions API with structured JSON output.
 
 Never put real keys in Git, HTML, JavaScript, database tables, or a publicly served file. The app loads the project-root .env file on the server before reading configuration. The real .env is ignored by Git; .env.example contains placeholders only. The local .env file takes precedence over process-level variables. Never put a real key in a commit.
 
-Local XAMPP setup: copy .env.example to C:\xampp\htdocs\quiz-creator\.env if you need a fresh template, then edit .env in VS Code. Set AI_PROVIDER=gemini, GEMINI_API_KEY to your private key, and GEMINI_MODEL=gemini-2.5-flash. Leave OPENAI_API_KEY blank if unused. Save the file and refresh the app; no Apache restart is normally needed for .env edits. The loader preserves quoted key characters and does not expand dollar signs or backslashes. Never paste the real key in chat, screenshots, Git, or browser code.
+Local XAMPP setup: copy .env.example to C:\xampp\htdocs\quiz-creator\.env if you need a fresh template, then edit .env in VS Code. Set GEMINI_API_KEY to your private key and GEMINI_MODEL=gemini-3.8-flash. Save the file and refresh the app; no Apache restart is normally needed for .env edits. The loader preserves quoted key characters and does not expand dollar signs or backslashes. Never paste the real key in chat, screenshots, Git, or browser code.
 
 The root .htaccess denies HTTP access to .env, .env.* and .git; storage/.htaccess denies requests to private uploads and text. These rules require Apache override access (AllowOverride AuthConfig or AllowOverride All) and mod_authz_core on Apache 2.4. Test directly by requesting http://localhost/quiz-creator/.env; Apache should return 403 or 404, never file content. If it returns another status, stop Apache and check C:\xampp\apache\conf\httpd.conf for AllowOverride None, enable the appropriate override for the project directory, and restart Apache. Settings reports only whether the selected key is present.
 
@@ -70,7 +69,7 @@ Live database initialization, upload through Apache, provider connectivity, and 
 ## 8. Troubleshooting
 
 - **Database unavailable:** start MySQL; import `database/schema.sql`; verify DB values in the Apache config and restart Apache.
-- **Provider key missing:** check that .env is readable by Apache and AI_PROVIDER=gemini is selected in Settings.
+- **Provider key missing:** check that .env is readable by Apache and GEMINI_API_KEY is configured in Settings.
 - **401/403:** recheck key, selected provider, account access, and model availability.
 - **429/timeout:** wait, check the provider dashboard and account limits, then retry. No alternate provider is selected automatically.
 - **PDF needs Composer:** run `composer install` in this project folder and confirm `vendor/autoload.php` exists.
@@ -86,7 +85,6 @@ This is for local personal use, not hardened for public internet deployment. It 
 
 ## 10. Provider references
 
-- [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses) and [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)
-- [Gemini generateContent API](https://ai.google.dev/api/generate-content) and [Structured outputs](https://ai.google.dev/gemini-api/docs/structured-output)
+- Gemini model list: https://aistudio.google.com/docs/models; Interactions API: https://ai.google.dev/gemini-api/docs/interactions-overview; structured output: https://ai.google.dev/gemini-api/docs/structured-output; pricing: https://ai.google.dev/gemini-api/docs/pricing.
 
 Configured model names are examples/defaults and remain editable. Confirm currently available models and pricing in the provider's account before use.
