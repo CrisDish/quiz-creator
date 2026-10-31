@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+/vendor/
+/storage/uploads/**
+/storage/extracted/**
+/storage/logs/**
+/storage/tmp/**
+!/storage/uploads/.gitkeep
+!/storage/extracted/.gitkeep
+!/storage/logs/.gitkeep
+!/storage/tmp/.gitkeep
+*.sql.gz
+*.log
